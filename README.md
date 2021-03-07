@@ -53,7 +53,7 @@ int main(){
 
 To compile and run *teal* code, first ensure *teal* is executable and run the transpiler:
 ```Bash
-$ chmod +x teal
-$ teal FizzBuzz.t
-$ ./a.out
+chmod +x teal
+teal FizzBuzz.t
+./a.out
 ```
