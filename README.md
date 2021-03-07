@@ -21,31 +21,31 @@ Here is a FizzBuzz program as a proof of concept:
 // teal FizzBuzz example
 import stdio
 
-int fizzBuzz(int i, int j){
+int fizzBuzz( int i, int j ){
 	if( i <= j ){
 		if( i % 15 == 0 ){
 			printf( "%s\n", "FizzBuzz" );
 			i++;
-			fizzBuzz(i, j);
+			fizzBuzz( i, j );
 		} else if( i % 3 == 0 ){
 			printf( "%s\n", "Fizz" );
 			i++;
-			fizzBuzz(i, j);
+			fizzBuzz( i, j );
 		} else if( i % 5 == 0 ){
 			printf( "%s\n", "Buzz" );
 			i++;
-			fizzBuzz(i, j);
+			fizzBuzz( i, j );
 		} else {
 			printf( "%d\n", i );
 			i++;
-			fizzBuzz(i, j);
+			fizzBuzz( i, j );
 		}
 	} return 0;
 }
 
 int main(){
-	fizzBuzz(0, 100);
-  return 0;
+	fizzBuzz( 0, 100 );
+	return 0;
 }
 ```
 
