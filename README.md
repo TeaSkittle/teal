@@ -1,6 +1,6 @@
 # teal
 
-An esoteric programming language based on a simple transpiler written in bash. Essentially this language compiles to C using gcc, but forces certain concepts and styling to itself. The transpiler uses regex with sed, grep, and awk and translates itself to C and then compiles.
+An esoteric programming language based on a simple transpiler written in bash. Essentially this language compiles to C using gcc, but forces certain concepts and styling to itself. The transpiler uses regex with sed, grep, and awk in a rather hacky way and translates itself to C and then compiles.
 
 ## Design Features
 
