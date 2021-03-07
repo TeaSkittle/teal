@@ -1,0 +1,84 @@
+#!/bin/bash -e
+# TEAL: Tea's Esoteric Artificial Language
+# Date started: March 4, 2021
+#
+# A simple transpiler that converts file using regex and compiles with gcc
+
+# Colors
+red="\e[0;91m"
+blue="\e[0;94m"
+reset="\e[0m"
+
+# Exit with error code, this is to force proper coding style within teal
+grep -ni '\/\*' "$1" && echo -e "${red}Error${reset}: Multi-line comments are not allowed, use double slash: //"  && exit 1
+grep -ni 'struct' "$1" && echo -e "${red}Error${reset}: Structs are not allowed" && exit 1
+grep -ni 'for('   "$1" && echo -e "${red}Error${reset}: Loops not allowed, use recursion" && exit 1
+grep -ni 'while(' "$1" && echo -e "${red}Error${reset}: Loops not allowed, use recursion" && exit 1
+grep -ni 'NULL'   "$1" && echo -e "${red}Error${reset}: The use of NULL is not allowed"   && exit 1
+grep -ni 'void'   "$1" && echo -e "${red}Error${reset}: The use of void is not allowed"   && exit 1
+grep -ni 'long long'   "$1" && echo -e "${red}Error${reset}: long long variables are not allowed"   && exit 1
+grep -ni 'long double' "$1" && echo -e "${red}Error${reset}: long double variables are not allowed" && exit 1
+grep -ni 'double long' "$1" && echo -e "${red}Error${reset}: double long variables are not allowed" && exit 1
+
+# Banned functions, from git's banned.h
+# Also, these should have errors since you can't change const vars
+grep -ni 'strcpy' "$1" && echo "${red}Error${reset}: strcpy not allowed, use: ${blue}memcpy( dest, src, sizeof( dest ))${reset}" && exit 1
+grep -ni 'strncpy' "$1" && echo "${red}Error${reset}: strncpy not allowed, use: ${blue}memcpy( dest, src, sizeof( dest ))${reset}" && exit 1
+grep -ni 'strcat' "$1" && echo "${red}Error${reset}: strcat not allowed, use: ${blue}memcpy( dest, src, sizeof( dest ))${reset}" && exit 1
+grep -ni 'strncat' "$1" && echo "${red}Error${reset}: strcat not allowed, use: ${blue}memcpy( dest, src, sizeof( dest ))${reset}" && exit 1
+
+
+# Add benned.h, this helps avoid several issues
+#echo '#include "banned.h"' > out.c
+cat "$1" > out.c
+# Add newline if not exists
+sed -i '$a\' out.c
+
+# Change imports, will add more later just wanted the basics for now
+sed -i 's/import stdio/#include <stdio.h>/g' out.c
+sed -i 's/import stdlib/#include <stdlib.h>/g' out.c
+sed -i 's/import string/#include <string.h>/g' out.c
+
+# Make all data types const
+# These are not being used right now, but were usefull for all types:
+#	sed -i 's/(int /(const int /g' out.c
+#	sed -i 's/,int /,const int /g' out.c
+#	sed -i 's/[[^,] \t]int /\tconst int /g' out.c
+#
+# Data types only change to const if tabbed, so force tabs and not spaces in styling
+#
+# int
+sed -i 's/\tint /\tconst int /g' out.c
+# short
+sed -i 's/\tshort /\tconst short /g' out.c
+# long
+sed -i 's/\tlong /\tconst long /g' out.c
+# float
+sed -i 's/\tfloat /\tconst float /g' out.c
+# char
+sed -i 's/\tchar /\tconst char /g' out.c
+
+# Fix main from above changes, not %100 needed
+#sed -i 's/^int main()/int main(int argc, char *argv[])/g' out.c
+# Compile out.c, using helpful flags: https://stackoverflow.com/a/3376483
+gcc -m32 -g -masm=intel \
+	-pedantic -Wall -Wextra -Wcast-align \
+	-Wwrite-strings -Waggregate-return -Wcast-qual -Wswitch-default \
+	-Wswitch-enum -Wunreachable-code -Wpointer-arith -Wfloat-equal \
+	-Wundef -Wshadow out.c 2> temp
+
+# check for warnings
+if [ $(wc -w temp | awk '{print $1}') -gt 0 ]
+then
+	echo "\n${red}Fix warnings and errors: ${reset}"
+	echo "------------------------\n"
+	gcc -m32 -g -masm=intel \
+		-pedantic -Wall -Wextra -Wcast-align \
+		-Wwrite-strings -Waggregate-return -Wcast-qual -Wswitch-default \
+		-Wswitch-enum -Wunreachable-code -Wpointer-arith -Wfloat-equal \
+		-Wundef -Wshadow out.c
+	# Remove below comment for debuging
+	#rm out.c a.out
+else
+	./a.out
+fi
